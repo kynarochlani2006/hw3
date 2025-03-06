@@ -96,7 +96,17 @@ template <typename T, typename PComparator>
 void Heap<T,PComparator>::push(const T& item){
 
   elements.push_back(item);
-  heapifyUP(elements.size() - 1);
+  size_t i = elements.size() - 1;
+
+  while(i > 0){
+    size_t theParent = (i - 1) / m;
+    if(comp(elements[i], elements[theParent])){
+      std::swap(elements[i], elements[theParent]);
+      i = theParent;
+    } else {
+      break;
+    }
+  }
 }
 
 
@@ -140,44 +150,36 @@ void Heap<T,PComparator>::pop()
 
   std::swap(elements.front(), elements.back());
   elements.pop_back();
+  
+
   if(!empty()){
-    heapifyDOWN(0);
-  }
+    size_t index = 0;
+
+    size_t size = elements.size();
 
 
-}
+    bool keepGoing = true;
 
-template <typename T, typename PComparator>
-void Heap<T,PComparator>::heapifyUP(size_t index){
+    while(keepGoing){
 
-  if(index == 0){
-    return;
-  }
+      keepGoing = false;
+      size_t topOne = index;
 
-  size_t parent = (index - 1)/m;
-  if(comp(elements[index], elements[parent])){
-    std::swap(elements[index], elements[parent]);
-    heapifyUP(parent);
-  }
-}
+      for(int i = 1; i <= m; i++){
+        size_t children = m *index + i;
+        if(children < size && comp(elements[children], elements[topOne])){
+          topOne = children;
+        }
+      }
 
-
-template <typename T, typename PComparator>
-void Heap<T,PComparator>::heapifyDOWN(size_t index){
-
-  size_t better = index;
-
-  for(int i = 0; i <= m; i++){
-    size_t child = m * index + i;
-    if(child < elements.size() && comp(elements[child], elements[better])){
-      better = child;
+      if(topOne != index){
+        std::swap(elements[index], elements[topOne]);
+        index = topOne;
+        keepGoing = true;
+      }
     }
   }
 
-  if(better != index){
-    std::swap(elements[index], elements[better]);
-    heapifyDOWN(better);
-  }
 }
 
 #endif
